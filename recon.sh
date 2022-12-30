@@ -45,8 +45,8 @@ iptables -A INPUT -p tcp -m tcp --tcp-flags RST RST -m limit --limit 2/second --
 
 # Protecting portscans
 # Attacking IP will be locked for 24 hours (3600 x 24 = 86400 Seconds)
-iptables -A INPUT -m recent --name portscan --rcheck --seconds 86400 -j DROP
-iptables -A FORWARD -m recent --name portscan --rcheck --seconds 86400 -j DROP
+iptables -A INPUT -m recent --name portscan --rcheck --seconds 500 -j DROP
+iptables -A FORWARD -m recent --name portscan --rcheck --seconds 500 -j DROP
 
 # Remove attacking IP after 24 hours
 iptables -A INPUT -m recent --name portscan --remove
@@ -58,6 +58,13 @@ iptables -A INPUT -p tcp -m tcp --dport 139 -m recent --name portscan --set -j D
 
 iptables -A FORWARD -p tcp -m tcp --dport 139 -m recent --name portscan --set -j LOG --log-prefix "portscan:"
 iptables -A FORWARD -p tcp -m tcp --dport 139 -m recent --name portscan --set -j DROP
+
+# Allow the following ports through from outside
+# SMTP = 25
+# DNS =53
+# HTTP = 80
+# HTTPS = 443
+# SSH = 22
 
 # Allow the following ports through from outside
 iptables -A INPUT -p tcp -m tcp --dport 25 -j ACCEPT
@@ -77,14 +84,6 @@ iptables -A INPUT -j REJECT
 ## Allow loopback OUTPUT
 iptables -A OUTPUT -o lo -j ACCEPT
 iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-
-# Allow the following ports through from outside
-# SMTP = 25
-# DNS =53
-# HTTP = 80
-# HTTPS = 443
-# SSH = 22
-### You can also add or remove port no. as per your requirement
 
 iptables -A OUTPUT -p tcp -m tcp --dport 25 -j ACCEPT
 iptables -A OUTPUT -p udp -m udp --dport 53 -j ACCEPT
